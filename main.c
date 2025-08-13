@@ -1,13 +1,9 @@
 #include <SDL2/SDL.h>
+#include "util.h"
 #include "notes.h"
 #include "sampler.h"
 
-SDL_Window* window = NULL;
-SDL_Surface* win_surface = NULL;
-SDL_Renderer* renderer;
-SDL_Texture* texture;
-SDL_Surface* skin = NULL;
-
+int running = 1;
 
 int init() {
     if ( SDL_Init( SDL_INIT_EVERYTHING ) < 0) {
@@ -18,7 +14,7 @@ int init() {
     window = SDL_CreateWindow(
         "xdj",
         SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,
-        128 * 4,64 * 4,SDL_WINDOW_BORDERLESS);
+        _WIN_W_ * _SCALE_,_WIN_H_ * _SCALE_,SDL_WINDOW_BORDERLESS);
     if(!window) {
         printf("%s",SDL_GetError());
         return 1;
@@ -59,133 +55,148 @@ void kill() {
 	SDL_Quit();
 }
 
-void load() {
+void load_assets() {
     // ASSETS BMP IMAGES
     skin = SDL_LoadBMP("assets/skin.bmp");
     load_notes();
     load_sampler();
 }
 
-int main(int argc, char** args) {
-    
-    init();
+void input(SDL_Event e) {
+    while (SDL_PollEvent(&e) != 0) {
+    switch(e.type) {
+        case SDL_QUIT:
+            running=0;
+        case SDL_KEYDOWN:
+            switch(e.key.keysym.sym) {
+                // NOTES
+                    case SDLK_q:
+                        running=0;
+                        break;
+                    case SDLK_a:
+                        current_note = notes[0];
+                        decoration = 0;
+                        break;
+                    case SDLK_w:
+                        current_note = notes[0];
+                        decoration = 1;
+                        break;
+                    case SDLK_s:
+                        current_note = notes[1];
+                        decoration = 0;
+                        break;
+                    case SDLK_e:
+                        current_note = notes[2];
+                        decoration = 2;
+                    case SDLK_d:
+                        current_note = notes[2];
+                        decoration = 0;
+                        break;
+                    case SDLK_f:
+                        current_note = notes[3];
+                        decoration = 0;
+                        break;
+                    case SDLK_t:
+                        current_note = notes[3];
+                        decoration = 1;
+                        break;
+                    case SDLK_g:
+                        current_note = notes[4];
+                        decoration = 0;
+                        break;
+                    case SDLK_y:
+                        current_note = notes[5];
+                        decoration = 2;
+                        break;
+                    case SDLK_h:
+                        current_note = notes[5];
+                        decoration = 0;
+                        break;
+                    case SDLK_u:
+                        current_note = notes[6];
+                        decoration = 2;
+                        break;
+                    case SDLK_j:
+                        current_note = notes[6];
+                        decoration = 0;
+                        break;
+                    case SDLK_l:
+                        load_state = load_btn[1];
+                        printf("state1\n");
+                        break;
+                    // cursor
+                    case SDLK_RIGHT:
+                        if(cursor_pos.x < 128) {
+                            cursor_pos.x = cursor_pos.x + 2;
+                        }
+                        break;
+                    case SDLK_LEFT:
+                        if(cursor_pos.x > 0){
+                            cursor_pos.x = cursor_pos.x - 2;
+                        }
+                        break;
+                    case SDLK_UP:
+                        if(zoom < 0) {
+                            zoom = zoom + 1;
+                        }
+                        break;
+                    case SDLK_DOWN:
+                        zoom = zoom - 1;
+                        break;
+            }
+        case SDL_KEYUP:
+            switch(e.key.keysym.sym) {
+                case SDLK_l:
+                    load_state = load_btn[0];
+                    printf("state0\n");
+                    break;
+            }
+    }
+}
+}
 
-    load();
+void render() {
+    SDL_BlitSurface(skin, NULL, win_surface, NULL);
+    // notes + decorations
+    SDL_BlitSurface(current_note,NULL,win_surface,&note_position);
+    if(decoration == 0) {
+        if(SDL_BlitSurface(notes[9],NULL,win_surface,&decoration_position) < 0)
+            printf("%s\n",SDL_GetError());
+    }
+    if(decoration == 1) {
+        if(SDL_BlitSurface(notes[8],NULL,win_surface,&decoration_position) < 0)
+            printf("%s\n",SDL_GetError());
+    }
+    if(decoration == 2) {
+        if(SDL_BlitSurface(notes[7],NULL,win_surface,&decoration_position) < 0)
+            printf("%s\n",SDL_GetError());
+    }
+    // cursor
+    SDL_BlitSurface(cursor,NULL,win_surface,&cursor_pos);
+
+    // button
+    SDL_BlitSurface(load_state,NULL,win_surface,&load_pos);
+
+    // waveform
+    generate_waveform();
+    SDL_UpdateTexture(texture,NULL,win_surface->pixels,win_surface->pitch);
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer,texture,NULL,NULL);
+    SDL_Rect dst = {0, 0, _WIN_W_ * _SCALE_, _WIN_H_ * _SCALE_};
+    SDL_RenderCopy(renderer, waveform, NULL, &dst);
+    SDL_RenderPresent(renderer);
+    SDL_Delay(10);
+}
+
+int main(int argc, char** args) {
+    init();
+    load_assets();
 
     SDL_Event e;
-    int running = 1;
     while(running == 1)
     {
-        // event handling | input handling
-        while (SDL_PollEvent(&e) != 0) {
-            switch(e.type) {
-                case SDL_QUIT:
-                    running=0;
-                case SDL_KEYDOWN:
-                    switch(e.key.keysym.sym) {
-                        // NOTES
-                            case SDLK_q:
-                                running=0;
-                                break;
-                            case SDLK_a:
-                                current_note = notes[0];
-                                decoration = 0;
-                                break;
-                            case SDLK_w:
-                                current_note = notes[0];
-                                decoration = 1;
-                                break;
-                            case SDLK_s:
-                                current_note = notes[1];
-                                decoration = 0;
-                                break;
-                            case SDLK_e:
-                                current_note = notes[2];
-                                decoration = 2;
-                            case SDLK_d:
-                                current_note = notes[2];
-                                decoration = 0;
-                                break;
-                            case SDLK_f:
-                                current_note = notes[3];
-                                decoration = 0;
-                                break;
-                            case SDLK_t:
-                                current_note = notes[3];
-                                decoration = 1;
-                                break;
-                            case SDLK_g:
-                                current_note = notes[4];
-                                decoration = 0;
-                                break;
-                            case SDLK_y:
-                                current_note = notes[5];
-                                decoration = 2;
-                                break;
-                            case SDLK_h:
-                                current_note = notes[5];
-                                decoration = 0;
-                                break;
-                            case SDLK_u:
-                                current_note = notes[6];
-                                decoration = 2;
-                                break;
-                            case SDLK_j:
-                                current_note = notes[6];
-                                decoration = 0;
-                                break;
-                            case SDLK_l:
-                                load_state = load_btn[1];
-                                printf("state1\n");
-                                break;
-                            // cursor
-                            case SDLK_RIGHT:
-                                if(cursor_pos.x < 128) {
-                                    cursor_pos.x = cursor_pos.x + 2;
-                                }
-                                break;
-                            case SDLK_LEFT:
-                                if(cursor_pos.x > 0){
-                                    cursor_pos.x = cursor_pos.x - 2;
-                                }
-                                break;
-                    }
-                case SDL_KEYUP:
-                    switch(e.key.keysym.sym) {
-                        case SDLK_l:
-                            load_state = load_btn[0];
-                            printf("state0\n");
-                            break;
-                    }
-            }
-
-            // note and decoration
-            SDL_BlitSurface(skin, NULL, win_surface, NULL);
-            SDL_BlitSurface(current_note,NULL,win_surface,&note_position);
-            if(decoration == 0) {
-                if(SDL_BlitSurface(notes[9],NULL,win_surface,&decoration_position) < 0)
-                    printf("%s\n",SDL_GetError());
-            }
-            if(decoration == 1) {
-                if(SDL_BlitSurface(notes[8],NULL,win_surface,&decoration_position) < 0)
-                    printf("%s\n",SDL_GetError());
-            }
-            if(decoration == 2) {
-                if(SDL_BlitSurface(notes[7],NULL,win_surface,&decoration_position) < 0)
-                    printf("%s\n",SDL_GetError());
-            }
-            // cursor
-            SDL_BlitSurface(cursor,NULL,win_surface,&cursor_pos);
-
-            // button
-            SDL_BlitSurface(load_state,NULL,win_surface,&load_pos);
-
-            SDL_UpdateTexture(texture,NULL,win_surface->pixels,win_surface->pitch);
-            SDL_RenderClear(renderer);
-            SDL_RenderCopy(renderer,texture,NULL,NULL);
-            SDL_RenderPresent(renderer);
-            SDL_Delay(10);
-        }
+        input(e);
+        render();
     }
 
     kill();
