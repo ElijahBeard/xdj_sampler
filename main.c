@@ -1,0 +1,194 @@
+#include <SDL2/SDL.h>
+#include "notes.h"
+#include "sampler.h"
+
+SDL_Window* window = NULL;
+SDL_Surface* win_surface = NULL;
+SDL_Renderer* renderer;
+SDL_Texture* texture;
+SDL_Surface* skin = NULL;
+
+
+int init() {
+    if ( SDL_Init( SDL_INIT_EVERYTHING ) < 0) {
+        printf("%s",SDL_GetError());
+        return 1;        
+    }
+
+    window = SDL_CreateWindow(
+        "xdj",
+        SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,
+        128 * 4,64 * 4,SDL_WINDOW_BORDERLESS);
+    if(!window) {
+        printf("%s",SDL_GetError());
+        return 1;
+    }
+    SDL_Surface* icon = SDL_LoadBMP("assets/icon.bmp");
+    SDL_SetWindowIcon(window,icon);
+
+
+    renderer = SDL_CreateRenderer(window,-1,0);
+    if(!renderer) {
+        printf("%s",SDL_GetError());
+        return 1;
+    }
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY,"0");
+
+    texture = SDL_CreateTexture(renderer,SDL_PIXELFORMAT_RGB24,SDL_TEXTUREACCESS_STREAMING,128,64);
+    if (!texture) {
+        printf("%s", SDL_GetError());
+        return 1;
+    }
+
+    win_surface = SDL_CreateRGBSurfaceWithFormat(0,128,64,24,SDL_PIXELFORMAT_RGB24);
+    if(!win_surface) {
+        printf("%s",SDL_GetError());
+        return 1;
+    }
+
+    SDL_FillRect(win_surface,NULL,SDL_MapRGB(win_surface->format,127,127,127));
+    
+    return 0;
+}
+
+void kill() {
+    free_notes();
+    free_sampler();
+    SDL_DestroyRenderer( renderer );
+    SDL_DestroyWindow( window );
+	SDL_Quit();
+}
+
+void load() {
+    // ASSETS BMP IMAGES
+    skin = SDL_LoadBMP("assets/skin.bmp");
+    load_notes();
+    load_sampler();
+}
+
+int main(int argc, char** args) {
+    
+    init();
+
+    load();
+
+    SDL_Event e;
+    int running = 1;
+    while(running == 1)
+    {
+        // event handling | input handling
+        while (SDL_PollEvent(&e) != 0) {
+            switch(e.type) {
+                case SDL_QUIT:
+                    running=0;
+                case SDL_KEYDOWN:
+                    switch(e.key.keysym.sym) {
+                        // NOTES
+                            case SDLK_q:
+                                running=0;
+                                break;
+                            case SDLK_a:
+                                current_note = notes[0];
+                                decoration = 0;
+                                break;
+                            case SDLK_w:
+                                current_note = notes[0];
+                                decoration = 1;
+                                break;
+                            case SDLK_s:
+                                current_note = notes[1];
+                                decoration = 0;
+                                break;
+                            case SDLK_e:
+                                current_note = notes[2];
+                                decoration = 2;
+                            case SDLK_d:
+                                current_note = notes[2];
+                                decoration = 0;
+                                break;
+                            case SDLK_f:
+                                current_note = notes[3];
+                                decoration = 0;
+                                break;
+                            case SDLK_t:
+                                current_note = notes[3];
+                                decoration = 1;
+                                break;
+                            case SDLK_g:
+                                current_note = notes[4];
+                                decoration = 0;
+                                break;
+                            case SDLK_y:
+                                current_note = notes[5];
+                                decoration = 2;
+                                break;
+                            case SDLK_h:
+                                current_note = notes[5];
+                                decoration = 0;
+                                break;
+                            case SDLK_u:
+                                current_note = notes[6];
+                                decoration = 2;
+                                break;
+                            case SDLK_j:
+                                current_note = notes[6];
+                                decoration = 0;
+                                break;
+                            case SDLK_l:
+                                load_state = load_btn[1];
+                                printf("state1\n");
+                                break;
+                            // cursor
+                            case SDLK_RIGHT:
+                                if(cursor_pos.x < 128) {
+                                    cursor_pos.x = cursor_pos.x + 2;
+                                }
+                                break;
+                            case SDLK_LEFT:
+                                if(cursor_pos.x > 0){
+                                    cursor_pos.x = cursor_pos.x - 2;
+                                }
+                                break;
+                    }
+                case SDL_KEYUP:
+                    switch(e.key.keysym.sym) {
+                        case SDLK_l:
+                            load_state = load_btn[0];
+                            printf("state0\n");
+                            break;
+                    }
+            }
+
+            // note and decoration
+            SDL_BlitSurface(skin, NULL, win_surface, NULL);
+            SDL_BlitSurface(current_note,NULL,win_surface,&note_position);
+            if(decoration == 0) {
+                if(SDL_BlitSurface(notes[9],NULL,win_surface,&decoration_position) < 0)
+                    printf("%s\n",SDL_GetError());
+            }
+            if(decoration == 1) {
+                if(SDL_BlitSurface(notes[8],NULL,win_surface,&decoration_position) < 0)
+                    printf("%s\n",SDL_GetError());
+            }
+            if(decoration == 2) {
+                if(SDL_BlitSurface(notes[7],NULL,win_surface,&decoration_position) < 0)
+                    printf("%s\n",SDL_GetError());
+            }
+            // cursor
+            SDL_BlitSurface(cursor,NULL,win_surface,&cursor_pos);
+
+            // button
+            SDL_BlitSurface(load_state,NULL,win_surface,&load_pos);
+
+            SDL_UpdateTexture(texture,NULL,win_surface->pixels,win_surface->pitch);
+            SDL_RenderClear(renderer);
+            SDL_RenderCopy(renderer,texture,NULL,NULL);
+            SDL_RenderPresent(renderer);
+            SDL_Delay(10);
+        }
+    }
+
+    kill();
+
+    return 0;
+}
