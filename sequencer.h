@@ -1,0 +1,31 @@
+#pragma once
+#include <SDL2/SDL.h>
+#include "util.h"
+
+SDL_Surface* step_on;
+SDL_Surface* step_off;
+SDL_Surface* steps[16];
+
+void load_sequencer() { 
+    step_on = SDL_LoadBMP("assets/sequencer/1.bmp");
+    step_off = SDL_LoadBMP("assets/sequencer/0.bmp");
+    for(int i = 0; i < 16; i++) {
+        steps[i] = step_off;
+    }
+}
+
+void render_sequencer() {
+    SDL_Rect step_rect = {step_on->h,step_on->w,100,100};
+    for(int i = 0; i < 16; i++) {
+        SDL_BlitSurface(steps[i],NULL,win_surface,&step_rect);
+        step_rect.x = step_rect.x + 10;
+        if(i==7){step_rect.y = step_rect.y + 10; step_rect.x = step_rect.x - 60;}
+    }
+
+}
+
+void free_sequencer() {
+    for(int i = 0; i < 16; i++) {
+        SDL_FreeSurface(steps[i]);
+    }
+}

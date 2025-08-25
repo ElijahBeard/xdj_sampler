@@ -2,13 +2,14 @@
 #include "util.h"
 #include "notes.h"
 #include "sampler.h"
+#include "sequencer.h"
 
 int running = 1;
 
 int init() {
-    if ( SDL_Init( SDL_INIT_EVERYTHING ) < 0) {
+    if ( SDL_Init( SDL_INIT_EVERYTHING ) < 0 ) {
         printf("%s",SDL_GetError());
-        return 1;        
+        return 1;
     }
 
     window = SDL_CreateWindow(
@@ -21,7 +22,6 @@ int init() {
     }
     SDL_Surface* icon = SDL_LoadBMP("assets/icon.bmp");
     SDL_SetWindowIcon(window,icon);
-
 
     renderer = SDL_CreateRenderer(window,-1,0);
     if(!renderer) {
@@ -50,6 +50,7 @@ int init() {
 void kill() {
     free_notes();
     free_sampler();
+    free_sequencer();
     SDL_DestroyRenderer( renderer );
     SDL_DestroyWindow( window );
 	SDL_Quit();
@@ -57,9 +58,10 @@ void kill() {
 
 void load_assets() {
     // ASSETS BMP IMAGES
-    skin = SDL_LoadBMP("assets/skin.bmp");
+    skin = SDL_LoadBMP("assets/skin-nologo.bmp");
     load_notes();
     load_sampler();
+    load_sequencer();
 }
 
 void input(SDL_Event e) {
@@ -158,24 +160,15 @@ void input(SDL_Event e) {
 void render() {
     SDL_BlitSurface(skin, NULL, win_surface, NULL);
     // notes + decorations
-    SDL_BlitSurface(current_note,NULL,win_surface,&note_position);
-    if(decoration == 0) {
-        if(SDL_BlitSurface(notes[9],NULL,win_surface,&decoration_position) < 0)
-            printf("%s\n",SDL_GetError());
-    }
-    if(decoration == 1) {
-        if(SDL_BlitSurface(notes[8],NULL,win_surface,&decoration_position) < 0)
-            printf("%s\n",SDL_GetError());
-    }
-    if(decoration == 2) {
-        if(SDL_BlitSurface(notes[7],NULL,win_surface,&decoration_position) < 0)
-            printf("%s\n",SDL_GetError());
-    }
+    render_notes();
     // cursor
     SDL_BlitSurface(cursor,NULL,win_surface,&cursor_pos);
 
     // button
     SDL_BlitSurface(load_state,NULL,win_surface,&load_pos);
+
+    //seq
+    render_sequencer();
 
     // waveform
     generate_waveform();

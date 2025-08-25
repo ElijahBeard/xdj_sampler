@@ -24,10 +24,10 @@ void generate_waveform() {
     double tmp[wav_length];
     for (int i = 0; i < wav_length; i++) tmp[i] = wav_buffer[i] / 32768.0;
     
-    SDL_Rect clear_rect = {0, 23, 128, 45};
+    SDL_Rect clear_rect = {0,23,128,23};
+    SDL_SetRenderTarget(renderer, waveform);
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderFillRect(renderer, &clear_rect);
-    SDL_SetRenderTarget(renderer, waveform);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     
     for(int x = 0; x < _WIN_W_; x++) {
@@ -60,7 +60,7 @@ void load_sampler() {
     load_state = load_btn[0];
 
     // audio part
-    if(SDL_LoadWAV("assets/audio/clap_max.wav",&spec,&wav_buffer,&wav_length) == NULL)
+    if(SDL_LoadWAV("assets/audio/808.wav",&spec,&wav_buffer,&wav_length) == NULL)
         printf("%s\n",SDL_GetError());
 }
 

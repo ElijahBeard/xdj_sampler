@@ -10,4 +10,8 @@ int zoom = 0;
 
 #define _WIN_W_ 128
 #define _WIN_H_ 64
-#define _SCALE_ 4
+#define _SCALE_ 5
+
+void load_and_blit(SDL_Surface* surface,int x,int y) {
+    SDL_Rect tmp_rect = {surface->w,surface->h,x,y};
+}

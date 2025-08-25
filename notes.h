@@ -1,4 +1,5 @@
 #pragma once
+#include "util.h"
 SDL_Surface *notes[10];
 SDL_Surface *current_note;
 SDL_Rect note_position;
@@ -32,6 +33,23 @@ void load_notes() {
     decoration_position.w = notes[8]->w;
     decoration_position.x = 5;
     decoration_position.y = 55;
+}
+
+void render_notes() {
+    SDL_BlitSurface(current_note,NULL,win_surface,&note_position);
+    if(decoration == 0) {
+        if(SDL_BlitSurface(notes[9],NULL,win_surface,&decoration_position) < 0)
+            printf("%s\n",SDL_GetError());
+    }
+    if(decoration == 1) {
+        if(SDL_BlitSurface(notes[8],NULL,win_surface,&decoration_position) < 0)
+            printf("%s\n",SDL_GetError());
+    }
+    if(decoration == 2) {
+        if(SDL_BlitSurface(notes[7],NULL,win_surface,&decoration_position) < 0)
+            printf("%s\n",SDL_GetError());
+    }
+
 }
 
 void free_notes() {
