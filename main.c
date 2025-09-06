@@ -184,10 +184,13 @@ void render() {
 int main(int argc, char** args) {
     init();
     load_assets();
-
+    
     SDL_Event e;
     while(running == 1)
     {
+        ticks = SDL_GetTicks();
+        elapsed = ticks - last_ticks;
+        printf("BPM:%d elapsed:%d\n",(elapsed / (BPM/60*1000)),ticks);
         input(e);
         render();
     }
