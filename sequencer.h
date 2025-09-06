@@ -32,6 +32,11 @@ void render_sequencer() {
     if(current_step == _STEPS_) current_step = 0;
 }
 
+Uint32 step(Uint32, void*) {
+    current_step++;
+    return 60000 / BPM;
+}
+
 void free_sequencer() {
     // for(int i = 0; i < _STEPS_; i++) {
     //     SDL_FreeSurface(steps[i]);
