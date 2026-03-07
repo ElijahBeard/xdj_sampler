@@ -1,6 +1,7 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include "util.h"
+#include "audio.h"
 
 SDL_Surface *cursor;
 SDL_Rect cursor_pos;
@@ -13,10 +14,41 @@ SDL_AudioSpec spec;
 Uint32 wav_length;
 Uint8 *wav_buffer;
 
-SDL_Texture *waveform;
+void render_live_waveform()
+{
+    float local[WAVEFORM_SIZE];
+
+    ma_mutex_lock(&waveform_mutex);
+    memcpy(local, waveform_buffer, sizeof(local));
+    ma_mutex_unlock(&waveform_mutex);
+
+    int mid = _WIN_H_ / 2;
+    int scale = 20;
+
+    SDL_Rect clear_rect = {0,23,128,23};
+    SDL_SetRenderTarget(renderer, waveform);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderFillRect(renderer, &clear_rect);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+
+    for(int x = 0; x < _WIN_W_; x++)
+    {
+        int index = (x * WAVEFORM_SIZE) / _WIN_W_;
+        float v = local[index];
+
+        int y = mid - (v * scale);
+
+        SDL_RenderDrawLine(renderer, x, mid, x, y);
+    }
+
+    SDL_SetRenderTarget(renderer, NULL);
+}
 
 
-void generate_waveform() {
+void generate_waveform(char* path) {
+    if(SDL_LoadWAV(path,&spec,&wav_buffer,&wav_length) == NULL)
+        printf("%s\n",SDL_GetError());
+
     int multiplier = 1000;
     int mid_y = _WIN_H_ / 2 + 1;
     int pixel_length = round(wav_length / _WIN_W_ + zoom);
@@ -59,9 +91,7 @@ void load_sampler() {
     
     load_state = load_btn[0];
 
-    // audio part
-    if(SDL_LoadWAV("assets/audio/808.wav",&spec,&wav_buffer,&wav_length) == NULL)
-        printf("%s\n",SDL_GetError());
+    // generate_waveform("assets/audio/808.wav");
 }
 
 
@@ -71,4 +101,3 @@ void free_sampler() {
     SDL_FreeSurface(load_btn[0]);
     SDL_FreeSurface(load_btn[1]);
 }
-
