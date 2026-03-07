@@ -23,13 +23,13 @@ void render_live_waveform()
     ma_mutex_unlock(&waveform_mutex);
 
     int mid = _WIN_H_ / 2;
-    int scale = 50;
+    int scale = 20;
 
+    SDL_Rect clear_rect = {0,23,128,23};
     SDL_SetRenderTarget(renderer, waveform);
-    SDL_SetRenderDrawColor(renderer,255,255,255,255);
-    SDL_RenderClear(renderer);
-
-    SDL_SetRenderDrawColor(renderer,0,0,0,255);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderFillRect(renderer, &clear_rect);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
     for(int x = 0; x < _WIN_W_; x++)
     {
@@ -101,4 +101,3 @@ void free_sampler() {
     SDL_FreeSurface(load_btn[0]);
     SDL_FreeSurface(load_btn[1]);
 }
-

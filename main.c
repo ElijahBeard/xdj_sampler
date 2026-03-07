@@ -98,72 +98,72 @@ void input(SDL_Event e) {
                         // NOTES
                             case SDLK_ESCAPE: running=0; break;
                             case SDLK_a:
-                                note = 50;
+                                note = 50 + (12 * oct);
                                 note_on(note);
                                 current_note = notes[0];
                                 decoration = 0;
                                 break;
                             case SDLK_w:
-                                note = 51;
+                                note = 51 + (12 * oct);
                                 note_on(note);
                                 current_note = notes[0];
                                 decoration = 1;
                                 break;
                             case SDLK_s:
-                                note = 52;
+                                note = 52 + (12 * oct);
                                 note_on(note);
                                 current_note = notes[1];
                                 decoration = 0;
                                 break;
                             case SDLK_e:
-                                note = 53;
+                                note = 53 + (12 * oct);
                                 note_on(note);
                                 current_note = notes[2];
                                 decoration = 2;
                             case SDLK_d:
-                                note = 54;
+                                note = 54 + (12 * oct);
                                 note_on(note);
                                 current_note = notes[2];
                                 decoration = 0;
                                 break;
                             case SDLK_f:
-                                note = 55;
+                                note = 55 + (12 * oct);
                                 note_on(note);
                                 current_note = notes[3];
                                 decoration = 0;
                                 break;
                             case SDLK_t:
-                                note = 56;
+                                note = 56 + (12 * oct);
                                 note_on(note);
                                 current_note = notes[3];
                                 decoration = 1;
                                 break;
                             case SDLK_g:
-                                note = 57;
+                                note = 57 + (12 * oct);
                                 note_on(note);
                                 current_note = notes[4];
                                 decoration = 0;
                                 break;
                             case SDLK_y:
-                                note = 58;
+                                note = 58 + (12 * oct);
                                 note_on(note);
                                 current_note = notes[5];
                                 decoration = 2;
                                 break;
                             case SDLK_h:
-                                note = 59;
+                                note = 59 + (12 * oct);
                                 note_on(note);
                                 current_note = notes[5];
                                 decoration = 0;
                                 break;
                             case SDLK_u:
-                                note = 60;
+                                note = 60 + (12 * oct);
                                 note_on(note);
                                 current_note = notes[6];
                                 decoration = 2;
                                 break;
                             case SDLK_j:
-                                note = 61;
+                                note = 61 + (12 * oct);
                                 note_on(note);
                                 current_note = notes[6];
                                 decoration = 0;
@@ -187,9 +187,11 @@ void input(SDL_Event e) {
                                 }
                                 break;
                             case SDLK_UP:
+                                oct++;
                                 BPM++;
                                 break;
                             case SDLK_DOWN:
+                                oct--;
                                 BPM--;
                                 break;
                             // knobs
