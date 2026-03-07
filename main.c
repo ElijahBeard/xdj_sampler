@@ -81,120 +81,143 @@ void load_assets() {
 }
 
 void input(SDL_Event e) {
+    const Uint8 *keystate = SDL_GetKeyboardState(NULL);
+    if (keystate[SDLK_z])
+    {
+        printf("Note Play\n");
+        note = 55;
+        note_on(note);
+    }
     while (SDL_PollEvent(&e) != 0) {
         switch(e.type) {
             case SDL_QUIT:
                 running=0;
             case SDL_KEYDOWN:
-                switch(e.key.keysym.sym) {
-                    // NOTES
-                        case SDLK_q:
-                            running=0;
-                            break;
-                        case SDLK_a:
-                            note = 50;
-                            note_on(note);
-                            current_note = notes[0];
-                            decoration = 0;
-                            break;
-                        case SDLK_w:
-                            note = 51;
-                            note_on(note);
-                            current_note = notes[0];
-                            decoration = 1;
-                            break;
-                        case SDLK_s:
-                            note = 52;
-                            note_on(note);
-                            current_note = notes[1];
-                            decoration = 0;
-                            break;
-                        case SDLK_e:
-                            note = 53;
-                            note_on(note);
-                            current_note = notes[2];
-                            decoration = 2;
-                        case SDLK_d:
-                            note = 54;
-                            note_on(note);
-                            current_note = notes[2];
-                            decoration = 0;
-                            break;
-                        case SDLK_f:
-                            note = 55;
-                            current_note = notes[3];
-                            decoration = 0;
-                            break;
-                        case SDLK_t:
-                            current_note = notes[3];
-                            decoration = 1;
-                            break;
-                        case SDLK_g:
-                            current_note = notes[4];
-                            decoration = 0;
-                            break;
-                        case SDLK_y:
-                            current_note = notes[5];
-                            decoration = 2;
-                            break;
-                        case SDLK_h:
-                            current_note = notes[5];
-                            decoration = 0;
-                            break;
-                        case SDLK_u:
-                            current_note = notes[6];
-                            decoration = 2;
-                            break;
-                        case SDLK_j:
-                            current_note = notes[6];
-                            decoration = 0;
-                            break;
-                        case SDLK_l:
-                            load_state = load_btn[1];
-                            break;
-                        // cursor
-                        case SDLK_RIGHT:
-                            if(cursor_pos.x < 128) {
-                                cursor_pos.x = cursor_pos.x + 2;
-                            }
-                            break;
-                        case SDLK_LEFT:
-                            if(cursor_pos.x > 0){
-                                cursor_pos.x = cursor_pos.x - 2;
-                            }
-                            break;
-                        case SDLK_UP:
-                            BPM++;
-                            break;
-                        case SDLK_DOWN:
-                            BPM--;
-                            break;
-                        // knobs
-                        case SDLK_z:
-                            rotate_knob(&A_rect,A = A + .3);
-                            break;
-                        case SDLK_x:
-                            rotate_knob(&S_rect,S = S + .3);
-                            break;
-                        case SDLK_c:
-                            rotate_knob(&D_rect,D = D + .3);
-                            break;
-                        case SDLK_v:
-                            rotate_knob(&R_rect,R = R + .3);
-                            break;
-                        default:
-                            break;
+                if (e.key.repeat == 0) {
+                    switch(e.key.keysym.sym) {
+                        // NOTES
+                            case SDLK_ESCAPE: running=0; break;
+                            case SDLK_a:
+                                note = 50;
+                                note_on(note);
+                                current_note = notes[0];
+                                decoration = 0;
+                                break;
+                            case SDLK_w:
+                                note = 51;
+                                note_on(note);
+                                current_note = notes[0];
+                                decoration = 1;
+                                break;
+                            case SDLK_s:
+                                note = 52;
+                                note_on(note);
+                                current_note = notes[1];
+                                decoration = 0;
+                                break;
+                            case SDLK_e:
+                                note = 53;
+                                note_on(note);
+                                current_note = notes[2];
+                                decoration = 2;
+                            case SDLK_d:
+                                note = 54;
+                                note_on(note);
+                                current_note = notes[2];
+                                decoration = 0;
+                                break;
+                            case SDLK_f:
+                                note = 55;
+                                note_on(note);
+                                current_note = notes[3];
+                                decoration = 0;
+                                break;
+                            case SDLK_t:
+                                note = 56;
+                                note_on(note);
+                                current_note = notes[3];
+                                decoration = 1;
+                                break;
+                            case SDLK_g:
+                                note = 57;
+                                note_on(note);
+                                current_note = notes[4];
+                                decoration = 0;
+                                break;
+                            case SDLK_y:
+                                note = 58;
+                                note_on(note);
+                                current_note = notes[5];
+                                decoration = 2;
+                                break;
+                            case SDLK_h:
+                                note = 59;
+                                note_on(note);
+                                current_note = notes[5];
+                                decoration = 0;
+                                break;
+                            case SDLK_u:
+                                note = 60;
+                                note_on(note);
+                                current_note = notes[6];
+                                decoration = 2;
+                                break;
+                            case SDLK_j:
+                                note = 61;
+                                note_on(note);
+                                current_note = notes[6];
+                                decoration = 0;
+                                break;
+                            case SDLK_l:
+                                load_state = load_btn[1];
+                                break;
+                            // cursor
+                            case SDLK_RIGHT:
+                                if(cursor_pos.x < 128) {
+                                    cursor_pos.x = cursor_pos.x + 2;
+                                }
+                                instrument++;
+                                break;
+                            case SDLK_LEFT:
+                                if(cursor_pos.x > 0){
+                                    cursor_pos.x = cursor_pos.x - 2;
+                                }
+                                if(instrument > 0){
+                                    instrument--;
+                                }
+                                break;
+                            case SDLK_UP:
+                                BPM++;
+                                break;
+                            case SDLK_DOWN:
+                                BPM--;
+                                break;
+                            // knobs
+                            case SDLK_z:
+                                rotate_knob(&A_rect,A = A + .3);
+                                break;
+                            case SDLK_x:
+                                rotate_knob(&S_rect,S = S + .3);
+                                break;
+                            case SDLK_c:
+                                rotate_knob(&D_rect,D = D + .3);
+                                break;
+                            case SDLK_v:
+                                rotate_knob(&R_rect,R = R + .3);
+                                break;
+                            default:
+                                break;
+                    }
                 }
                 break;
             case SDL_KEYUP:
                 switch(e.key.keysym.sym) {
-                    case SDLK_l:
-                        load_state = load_btn[0];
-                        break;
-                    default:
-                        note_off(note);
-                        printf("Depressed\n");
-
+                    case SDLK_l:load_state = load_btn[0];break;
+                    case SDLK_a:note_off(note);break;
+                    case SDLK_s:note_off(note);break;
+                    case SDLK_d:note_off(note);break;
+                    case SDLK_f:note_off(note);break;
+                    case SDLK_g:note_off(note);break;
                 }
         }
     }
@@ -217,7 +240,7 @@ void render() {
     render_ASDR();
 
     // waveform
-    generate_waveform();
+    render_live_waveform();
 
     // scaling
     SDL_UpdateTexture(texture,NULL,win_surface->pixels,win_surface->pitch);
