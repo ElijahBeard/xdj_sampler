@@ -2,6 +2,7 @@
 #include "util.h"
 int note;
 int oct = 0;
+float tune = 0.0f;
 SDL_Surface *notes[10];
 SDL_Surface *current_note;
 SDL_Rect note_position;

@@ -6,6 +6,7 @@
 #include "sequencer.h"
 #include "knob.h"
 #include "audio.h"
+#include "load.h"
 
 int running = 1;
 
@@ -40,6 +41,7 @@ int init() {
         printf("%s",SDL_GetError());
         return 5;
     }
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY,"0");
 
     texture = SDL_CreateTexture(renderer,SDL_PIXELFORMAT_RGB24,SDL_TEXTUREACCESS_STREAMING,128,64);
@@ -81,13 +83,6 @@ void load_assets() {
 }
 
 void input(SDL_Event e) {
-    const Uint8 *keystate = SDL_GetKeyboardState(NULL);
-    if (keystate[SDLK_z])
-    {
-        printf("Note Play\n");
-        note = 55;
-        note_on(note);
-    }
     while (SDL_PollEvent(&e) != 0) {
         switch(e.type) {
             case SDL_QUIT:
@@ -120,6 +115,7 @@ void input(SDL_Event e) {
                                 note_on(note);
                                 current_note = notes[2];
                                 decoration = 2;
+                                break;
                             case SDLK_d:
                                 note = 54 + (12 * oct);
                                 note_on(note);
@@ -168,8 +164,23 @@ void input(SDL_Event e) {
                                 current_note = notes[6];
                                 decoration = 0;
                                 break;
+                            // loading
                             case SDLK_l:
+                                load = 1;
                                 load_state = load_btn[1];
+                                SDL_StartTextInput();
+                                break;
+                            case SDLK_RETURN:
+                                if(strlen(text) > 0) {
+                                    load_new_sf(text);
+                                }
+                                load = 0;
+                                SDL_StopTextInput();
+                                break;
+                            case SDLK_BACKSPACE:
+                                if (strlen(text) > 0) {
+                                    text[strlen(text) - 1] = '\0';
+                                }
                                 break;
                             // cursor
                             case SDLK_RIGHT:
@@ -196,10 +207,14 @@ void input(SDL_Event e) {
                                 break;
                             // knobs
                             case SDLK_z:
+                                tune += 0.1f;
+                                tsf_channel_set_tuning(g_sf,0,tune);
                                 rotate_knob(&A_rect,A = A + .3);
                                 break;
                             case SDLK_x:
-                                rotate_knob(&S_rect,S = S + .3);
+                                tune -= 0.1f;
+                                tsf_channel_set_tuning(g_sf,0,tune);
+                                rotate_knob(&A_rect,A = A - .3);
                                 break;
                             case SDLK_c:
                                 rotate_knob(&D_rect,D = D + .3);
@@ -215,41 +230,50 @@ void input(SDL_Event e) {
             case SDL_KEYUP:
                 switch(e.key.keysym.sym) {
                     case SDLK_l:load_state = load_btn[0];break;
-                    case SDLK_a:note_off(note);break;
-                    case SDLK_s:note_off(note);break;
-                    case SDLK_d:note_off(note);break;
-                    case SDLK_f:note_off(note);break;
-                    case SDLK_g:note_off(note);break;
+                    case SDLK_a:tsf_note_off_all(g_sf);break;
+                    case SDLK_s:tsf_note_off_all(g_sf);break;
+                    case SDLK_d:tsf_note_off_all(g_sf);break;
+                    case SDLK_f:tsf_note_off_all(g_sf);break;
+                    case SDLK_g:tsf_note_off_all(g_sf);break;
                 }
+                break;
+            case SDL_TEXTINPUT:
+                strncat(text, e.text.text, TEXT_MAX - strlen(text) - 1);
+                break;
+            case SDL_TEXTEDITING:
+                strncpy(composition, e.edit.text, TEXT_MAX - 1);
+                composition[TEXT_MAX - 1] = '\0';
+                cursor_text = e.edit.start;
+                selection_len = e.edit.length;
+                break;
         }
     }
 }
 
 void render() {
     SDL_BlitSurface(skin, NULL, win_surface, NULL);
-    // notes + decorations
     render_notes();
-    // cursor
-    SDL_BlitSurface(cursor,NULL,win_surface,&cursor_pos);
-
-    // button
-    SDL_BlitSurface(load_state,NULL,win_surface,&load_pos);
-
-    // seq
     render_sequencer();
-
-    // knobs(ASDR)
     render_ASDR();
-
-    // waveform
     render_live_waveform();
-
+    SDL_BlitSurface(cursor,NULL,win_surface,&cursor_pos);
+    SDL_BlitSurface(load_state,NULL,win_surface,&load_pos);
     // scaling
     SDL_UpdateTexture(texture,NULL,win_surface->pixels,win_surface->pitch);
     SDL_RenderCopy(renderer,texture,NULL,NULL);
+
     SDL_Rect dst = {0, 0, _WIN_W_ * _SCALE_, _WIN_H_ * _SCALE_};
     SDL_RenderCopy(renderer, waveform, NULL, &dst); // waveform
     SDL_RenderCopy(renderer, asdr, NULL, NULL);
+    
+    if(load) {
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+        SDL_SetRenderDrawColor(renderer,0,0,0,128);
+        SDL_Rect r = {0,0,_WIN_W_*_SCALE_,_WIN_H_*_SCALE_};
+        SDL_RenderFillRect(renderer,&r);
+        render_load();
+    }
+
     SDL_RenderPresent(renderer);
     SDL_Delay(10);
 }
