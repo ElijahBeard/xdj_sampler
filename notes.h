@@ -1,5 +1,6 @@
 #pragma once
 #include "util.h"
+int note;
 SDL_Surface *notes[10];
 SDL_Surface *current_note;
 SDL_Rect note_position;
@@ -49,7 +50,6 @@ void render_notes() {
         if(SDL_BlitSurface(notes[7],NULL,win_surface,&decoration_position) < 0)
             printf("%s\n",SDL_GetError());
     }
-
 }
 
 void free_notes() {
