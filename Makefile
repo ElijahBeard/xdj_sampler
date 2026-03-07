@@ -1,5 +1,8 @@
+CFLAGS := $(shell pkg-config --cflags SDL2_ttf)
+LIBS := $(shell pkg-config --libs SDL2_ttf)
+
 all:
-	gcc *.c -o xdj -I/opt/homebrew/include -L/opt/homebrew/lib -lSDL2
+	gcc *.c -o xdj $(CFLAGS) $(LIBS)
 
 clean:
 	rm xdj

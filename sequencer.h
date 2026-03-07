@@ -7,14 +7,29 @@
 SDL_Surface* step_on;
 SDL_Surface* step_off;
 SDL_Surface* steps[_STEPS_];
+SDL_Surface* met;
 uint8_t current_step = 0;
 
 void load_sequencer() { 
     step_on = SDL_LoadBMP("assets/sequencer/1.bmp");
     step_off = SDL_LoadBMP("assets/sequencer/0.bmp");
+    met = SDL_LoadBMP("assets/sequencer/bpm.bmp");
     for(int i = 0; i < _STEPS_; i++) {
         steps[i] = step_off;
     }
+}
+
+void render_bpm() {
+    char bpm_text[16];
+    snprintf(bpm_text,sizeof(bpm_text),"%d",BPM);
+    SDL_Color text_color = {255, 255, 255};
+    SDL_Surface* text = TTF_RenderText_Solid(font, bpm_text, text_color);
+    if(!text){printf("%s\n", TTF_GetError());}
+    SDL_Rect dest = { 54, 52, text->w, text->h };
+    SDL_BlitSurface(text, NULL, win_surface, &dest);
+    SDL_Rect bmp_rect = { 46,57,met->w,met->h };
+    SDL_BlitSurface(met,NULL,win_surface,&bmp_rect);
+    SDL_FreeSurface(text);
 }
 
 void render_sequencer() {
@@ -30,9 +45,10 @@ void render_sequencer() {
         if(i==7){step_rect.y = step_rect.y + 10; step_rect.x = step_rect.x - 60;}
     }
     if(current_step == _STEPS_) current_step = 0;
+    render_bpm();
 }
 
-Uint32 step(Uint32, void*) {
+Uint32 step() {
     current_step++;
     return 60000 / BPM;
 }
