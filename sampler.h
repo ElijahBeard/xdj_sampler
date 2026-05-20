@@ -1,7 +1,9 @@
 #pragma once
+
 #include <SDL2/SDL.h>
 #include "util.h"
 #include "audio.h"
+#include "math.h"
 
 SDL_Surface *cursor;
 SDL_Rect cursor_pos;

@@ -1,8 +1,10 @@
 #include "util.h"
 #include "audio.h"
+#include "soundfont/miniaudio_io.h"
+#include "soundfont/tsf.h"
 
 #define TEXT_MAX 256
-bool load = 0;
+int load = 0;
 char text[TEXT_MAX] = "";
 char composition[TEXT_MAX] = "";
 Sint32 selection_len;

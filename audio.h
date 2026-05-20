@@ -1,10 +1,13 @@
 #pragma once
-#define MINIAUDIO_IMPLEMENTATION
-#include "soundfont/miniaudio_io.h"
-#define TSF_IMPLEMENTATION
-#include "soundfont/tsf.h"
 
+#include "soundfont/miniaudio_io.h"
+#include "soundfont/tsf.h"
+#include "util.h"
+
+#define MINIAUDIO_IMPLEMENTATION
+#define TSF_IMPLEMENTATION
 #define WAVEFORM_SIZE 2048
+
 float waveform_buffer[WAVEFORM_SIZE];
 SDL_Texture *waveform;
 int waveform_write = 0;
@@ -34,11 +37,10 @@ static void AudioCallback(ma_device* pDevice, void* pOutput, const void* pInput,
     }
 
     ma_mutex_unlock(&waveform_mutex);
-
 }
 
 int init_audio() {
-    /* Mini Audio Init */
+    // Mini Audio Init
     device_config = ma_device_config_init(ma_device_type_playback);
     device_config.playback.format = ma_format_f32;
     device_config.playback.channels = 2;
@@ -46,7 +48,7 @@ int init_audio() {
     device_config.dataCallback = AudioCallback;
     if (ma_device_init(NULL,&device_config,&device) != 0) {perror("Couldn't Init Audio Driver\n");return 1;}
 
-    /* SoundFont Init */
+    // SoundFont Init
     g_sf = tsf_load_filename(sound_font_path);
     if (!g_sf) {perror("Couldn't Load SoundFont\n");return 1;}
     tsf_set_output(g_sf,TSF_STEREO_INTERLEAVED,(int)device_config.sampleRate,0);

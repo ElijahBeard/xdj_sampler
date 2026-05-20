@@ -4,9 +4,9 @@
 #include "notes.h"
 #include "sampler.h"
 #include "sequencer.h"
-#include "knob.h"
 #include "audio.h"
 #include "load.h"
+#include "knob.h"
 
 int running = 1;
 
